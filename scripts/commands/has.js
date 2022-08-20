@@ -1,7 +1,7 @@
-import { world } from "mojang-minecraft"
+import { world } from "mojang-minecraft";
 import CommandBuilder from "../classes/builders/CommandBuilder.js";
-import CommandHandler from "../classes/CommandRegistration.js"
-import Database from "../database"
+import CommandHandler from "../classes/CommandRegistration.js";
+import Database from "../database";
 
 const registration = new CommandBuilder()
 .setName('has')

@@ -4,6 +4,7 @@ export default class Database {
 
     name;
     data;
+    oldData;
     
     constructor(DatabaseName){
         if(!world.scoreboard.getObjective('db')) this.runCommand('scoreboard objectives add db dummy');
@@ -19,7 +20,7 @@ export default class Database {
         world.scoreboard.getParticipants().every((val) => {
             if(val.type == ScoreboardIdentityType.fakePlayer){
                 if(val.displayName.startsWith(`&${this.name}`)){
-                    this.data = JSON.parse(val.displayName.replace(`&${this.name}`,'').substring(1,val.displayName.length-this.name.length-2));
+                    this.data = JSON.parse(val.displayName.replace(`&${this.name}`,'').substring(1,val.displayName.length-this.name.length-2).replace(/'/g,'"'));
                     return false;
                 }
             }
@@ -34,9 +35,8 @@ export default class Database {
         world.scoreboard.getParticipants().every((val) => {
             if(val.type == ScoreboardIdentityType.fakePlayer){
                 if(val.displayName.startsWith(`&${this.name}`)){
-                    this.runCommand(`say ${JSON.stringify(this.data)}`)
-                    this.runCommand(`scoreboard players reset "&${this.name}(${JSON.stringify(this.data)})" db`);
-                    this.runCommand(`scoreboard players set "&${this.name}(${JSON.stringify(this.data)})" db 0`);
+                    this.runCommand(`scoreboard players reset "&${this.name}(${JSON.stringify(this.oldData).replace(/"/g,"'")})" db`);
+                    this.runCommand(`scoreboard players set "&${this.name}(${JSON.stringify(this.data).replace(/"/g,"'")})" db 0`);
                     return false;
                 }
             }
@@ -49,12 +49,15 @@ export default class Database {
     }
 
     set(key, value){
+        this.oldData = {...this.data};
         this.data[key] = value;
         this.updateDatabase();
     }
 
     remove(key){
-        delete this.data[key]
+        if(!this.has(key)) throw new Error(`Database does not have key: ${key}`);
+        this.oldData = {...this.data};
+        delete this.data[key];
         this.updateDatabase();
     }
 
