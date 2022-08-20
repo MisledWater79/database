@@ -17,5 +17,8 @@ const registration = new CommandBuilder()
 CommandHandler.register(registration, (interaction) => {
     const key = interaction.command.getInput('key').getValue()
     const database = new Database('MisledWater79')
+    const t = new Date().getTime()
     database.remove(key)
+    const t2 = new Date().getTime()
+    world.getDimension('overworld').runCommand(`say Remove key "${key}". Time took ${t2 - t} ms`)
 })

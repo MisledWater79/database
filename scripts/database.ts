@@ -1,4 +1,4 @@
-import { Scoreboard, ScoreboardIdentityType, world } from "mojang-minecraft";
+import { ScoreboardIdentityType, world } from "mojang-minecraft";
 
 export default class Database {
 
@@ -6,7 +6,7 @@ export default class Database {
     private data: Object;
     
     constructor(DatabaseName: string){
-        if(!world.scoreboard.getObjective('db')) world.getDimension('overworld').runCommand('scoreboard objective add db dummy');
+        if(!world.scoreboard.getObjective('db')) world.getDimension('overworld').runCommand('scoreboard objectives add db dummy');
         this.name = DatabaseName;
         this.updateData();
     }
@@ -19,6 +19,7 @@ export default class Database {
         world.scoreboard.getParticipants().every((val) => {
             if(val.type == ScoreboardIdentityType.fakePlayer){
                 if(val.displayName.startsWith(`&${this.name}`)){
+                    console.log
                     this.data = JSON.parse(val.displayName.replace(`&${this.name}`,'').substring(1,val.displayName.length-1));
                     return false;
                 }

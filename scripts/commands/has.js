@@ -4,9 +4,9 @@ import CommandHandler from "../classes/CommandRegistration.js"
 import Database from "../database"
 
 const registration = new CommandBuilder()
-.setName('het')
+.setName('has')
 .setAliases([])
-.setDescription('Het')
+.setDescription('Has')
 .setUsage(['<key: string>'])
 .setCancelMessage(true)
 .setPrivate(false)
@@ -17,5 +17,8 @@ const registration = new CommandBuilder()
 CommandHandler.register(registration, (interaction) => {
     const key = interaction.command.getInput('key').getValue()
     const database = new Database('MisledWater79')
-    world.getDimension('overworld').runCommand(`say e: ${database.has(key)}`)
+    const t = new Date().getTime()
+    const value = database.has(key)
+    const t2 = new Date().getTime()
+    world.getDimension('overworld').runCommand(`say Has key "${key}"? ${value}. Time took ${t2 - t} ms`)
 })

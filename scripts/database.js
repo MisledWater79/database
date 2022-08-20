@@ -1,62 +1,65 @@
-"use strict";
-exports.__esModule = true;
-var mojang_minecraft_1 = require("mojang-minecraft");
-var Database = /** @class */ (function () {
-    function Database(DatabaseName) {
-        if (!mojang_minecraft_1.world.scoreboard.getObjective('db'))
-            mojang_minecraft_1.world.getDimension('overworld').runCommand('scoreboard objective add db dummy');
+import { ScoreboardIdentityType, world } from "mojang-minecraft";
+
+export default class Database {
+
+    name;
+    data;
+    
+    constructor(DatabaseName){
+        if(!world.scoreboard.getObjective('db')) this.runCommand('scoreboard objectives add db dummy');
         this.name = DatabaseName;
         this.updateData();
     }
-    Database.prototype.runCommand = function (c, d) {
-        if (d === void 0) { d = 'overworld'; }
-        return mojang_minecraft_1.world.getDimension(d).runCommand(c);
-    };
-    Database.prototype.updateData = function () {
-        var _this = this;
-        mojang_minecraft_1.world.scoreboard.getParticipants().every(function (val) {
-            if (val.type == mojang_minecraft_1.ScoreboardIdentityType.fakePlayer) {
-                if (val.displayName.startsWith("&".concat(_this.name))) {
-                    _this.data = JSON.parse(val.displayName.replace("&".concat(_this.name), '').substring(1, val.displayName.length - 1));
+
+    runCommand(c, d = 'overworld'){
+        return world.getDimension(d).runCommand(c);
+    }
+
+    updateData(){
+        world.scoreboard.getParticipants().every((val) => {
+            if(val.type == ScoreboardIdentityType.fakePlayer){
+                if(val.displayName.startsWith(`&${this.name}`)){
+                    this.data = JSON.parse(val.displayName.replace(`&${this.name}`,'').substring(1,val.displayName.length-this.name.length-2));
                     return false;
                 }
             }
-        });
-        if (!this.data) {
-            this.runCommand("scoreboard players set \"&".concat(this.name, "({})\" db 0"));
+        })
+        if(!this.data){
+            this.runCommand(`scoreboard players set "&${this.name}({})" db 0`);
             this.data = {};
         }
-    };
-    Database.prototype.updateDatabase = function () {
-        var _this = this;
-        mojang_minecraft_1.world.scoreboard.getParticipants().every(function (val) {
-            if (val.type == mojang_minecraft_1.ScoreboardIdentityType.fakePlayer) {
-                if (val.displayName.startsWith("&".concat(_this.name))) {
-                    _this.runCommand("scoreboard players reset &".concat(_this.name, "(").concat(JSON.stringify(_this.data), ") db"));
-                    _this.runCommand("scoreboard players set \"&".concat(_this.name, "(").concat(JSON.stringify(_this.data), ")\" db 0"));
+    }
+
+    updateDatabase(){
+        world.scoreboard.getParticipants().every((val) => {
+            if(val.type == ScoreboardIdentityType.fakePlayer){
+                if(val.displayName.startsWith(`&${this.name}`)){
+                    this.runCommand(`say ${JSON.stringify(this.data)}`)
+                    this.runCommand(`scoreboard players reset "&${this.name}(${JSON.stringify(this.data)})" db`);
+                    this.runCommand(`scoreboard players set "&${this.name}(${JSON.stringify(this.data)})" db 0`);
                     return false;
                 }
             }
-        });
-    };
-    Database.prototype.get = function (key) {
-        if (!this.has(key))
-            throw new Error("Database does not have key: ".concat(key));
+        })
+    }
+
+    get(key){
+        if(!this.has(key)) throw new Error(`Database does not have key: ${key}`);
         return this.data[key];
-    };
-    Database.prototype.set = function (key, value) {
+    }
+
+    set(key, value){
         this.data[key] = value;
         this.updateDatabase();
-    };
-    Database.prototype.remove = function (key) {
-        delete this.data[key];
+    }
+
+    remove(key){
+        delete this.data[key]
         this.updateDatabase();
-    };
-    Database.prototype.has = function (key) {
-        if (this.data[key])
-            return true;
+    }
+
+    has(key){
+        if(this.data[key]) return true;
         return false;
-    };
-    return Database;
-}());
-exports["default"] = Database;
+    }
+}
